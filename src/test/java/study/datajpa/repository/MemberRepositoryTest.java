@@ -3,6 +3,10 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -155,6 +159,48 @@ class MemberRepositoryTest {
         //빈값 컬렉션을 반환해줌
 
         //aaa1 는 단건이라 null
+
+    }
+
+    @Test
+    public void paging(){
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));//0페이지부터 3페이지씩
+        //when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+
+        //API 반환할때, -> 그냥 반환하며 안되고 DTO로 변환 반환해야함. (이렇게 변환해서 반환하면 괜찮음)
+        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null);
+
+        //then
+        List<Member> content = page.getContent(); //자동 page 처리
+        long totalElements = page.getTotalElements(); //카운트 쿼리
+
+        assertThat(content.size()).isEqualTo(3); //불려온 갯수
+        assertThat(page.getTotalElements()).isEqualTo(5); //전체갯수
+        assertThat(page.getNumber()).isEqualTo(0); //페이지 번호
+        assertThat(page.getTotalPages()).isEqualTo(2); //전체페이지
+        assertThat(page.hasNext()).isTrue(); //다음페이지가 있나
+        assertThat(page.isFirst()).isTrue(); //처음페이지인지
+
+        //when
+//        Slice<Member> SlicePage  = memberRepository.findByAge(age,pageRequest);
+//
+//        //then
+//        List<Member> SliceContent = SlicePage.getContent();
+//
+//        assertThat(SliceContent.size()).isEqualTo(3);
+//        assertThat(SlicePage.getNumber()).isEqualTo(0); //페이지 번호
+//        assertThat(SlicePage.hasNext()).isTrue(); //다음페이지가 있나
+//        assertThat(SlicePage.isFirst()).isTrue(); //처음페이지인지
+
 
     }
 
