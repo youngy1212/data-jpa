@@ -1,5 +1,7 @@
 package study.datajpa.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +30,8 @@ class MemberRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
     @Autowired TeamRepository teamRepository;
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void testMember(){
@@ -177,7 +181,7 @@ class MemberRepositoryTest {
         Page<Member> page = memberRepository.findByAge(age, pageRequest);
 
         //API 반환할때, -> 그냥 반환하며 안되고 DTO로 변환 반환해야함. (이렇게 변환해서 반환하면 괜찮음)
-        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null);
+        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
 
         //then
         List<Member> content = page.getContent(); //자동 page 처리
@@ -202,6 +206,28 @@ class MemberRepositoryTest {
 //        assertThat(SlicePage.isFirst()).isTrue(); //처음페이지인지
 
 
+    }
+
+    @Test
+    public void bulkUpdate(){
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20);
+//        em.flush();
+//        em.clear(); //이렇게 flush, clear 하면 아래서 DB에서 다시 조회해옴!!
+
+        Member member5 = memberRepository.findMemberByUsername("member5");
+        //여기서 member5는 40살일까? 41살일까 -> 40살 but
+        //하지만 DB에서는 41살임 -> 벌크연산을 이미 넣었음.
+
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
     }
 
 
