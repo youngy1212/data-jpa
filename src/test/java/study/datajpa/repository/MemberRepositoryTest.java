@@ -131,12 +131,30 @@ class MemberRepositoryTest {
 
     @Test
     public void findByNames(){
-         Member m1 = new Member("AAA", 10);
+        Member m1 = new Member("AAA", 10);
         Member m2 = new Member("BBB", 20);
         memberRepository.save(m1);
         memberRepository.save(m2);
 
         memberRepository.findByNames(Arrays.asList("AAA","BBB"));
+
+    }
+
+    @Test
+    public void returnType(){
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> aaa = memberRepository.findListByUsername("AAA");
+        Member aaa1 = memberRepository.findMemberByUsername("AAA");
+        Optional<Member> aaa2 = memberRepository.findOptionalByUsername("AAA");
+
+        //AAA가 값이 없다면 aaa는 null일까?
+        //빈값 컬렉션을 반환해줌
+
+        //aaa1 는 단건이라 null
 
     }
 
