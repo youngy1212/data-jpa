@@ -254,10 +254,41 @@ class MemberRepositoryTest {
         for (Member member : members) { //이떄 조회가됨 (지연로딩) n+1문제
             member.getTeam().getName();
         }
+    }
 
+    @Test
+    public void queryHint(){
 
+        //given
+        Member member1 = memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+        //when
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");
+        findMember.setUsername("member2");
+        //아나는 변경하려는게 아니고, DB에서 조회만 하고 끝날꺼야
+        //하지만 더티체킹 하는동안은 원본 + 비교본 해서 데이터를 사용험.
+        //변경이 안된다고 가정하고, 스냅샷을 만들지 않음.
+
+        em.flush();;
 
     }
+
+    @Test
+    public void lock(){
+
+        //given
+        Member member1 = memberRepository.save(new Member("member1", 10));
+        em.flush();
+        em.clear();
+
+        //when
+        List<Member> result = memberRepository.findLockByUsername("member1");
+
+    }
+
+
 
 
 }
