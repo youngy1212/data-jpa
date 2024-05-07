@@ -8,7 +8,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)  //jpa는 디퐅트 생성자가 필요함 protected 만 허용
 @ToString(of = {"id", "username", "age"}) //객체를 바로 찍을 때 출력
-public class Member {
+public class Member extends BaseEntity {
 
     //setter 지양
     @Id @GeneratedValue
@@ -46,4 +46,6 @@ public class Member {
         this.username = username;
         this.age = age;
     }
+
+
 }
