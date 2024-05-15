@@ -35,7 +35,7 @@ public class MemberController {
         return map;    //Dto로 내보내야함 람다로 memberDto new 호출하여 변환
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init(){
         for(int i = 0; i<100; i++){
             memberRepository.save(new Member("user"+i,i));
