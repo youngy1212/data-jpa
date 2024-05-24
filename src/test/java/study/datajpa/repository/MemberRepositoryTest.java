@@ -5,9 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -296,6 +294,60 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findMemberCustom();
     }
 
+    @Test
+    public void queryByExample(){
+
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        memberRepository.findByUsername("m1"); //정적일떄 사용
+
+        //Probe
+        Member member = new Member("m1");
+        Team team = new Team("teamA");
+        member.setTeam(team); //연관관계 AND 세팅
+
+        ExampleMatcher maucher = ExampleMatcher.matching().withIgnorePaths("age");
+        //나는 age라는 속성이 있다면 무시할꺼야.
+
+        Example<Member> example = Example.of(member,maucher); //저장하고 그런게 아니라 m1이라는 객체를 찾고싶어
+        List<Member> result = memberRepository.findAll(example); //만들어진 m1도메인 객체를 검색
+
+        assertThat(result.get(0).getUsername()).isEqualTo("m1");
+
+    }
+
+    @Test
+    public void projections(){
+
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+        em.flush();
+        em.clear();
+
+        //when m1,m2 이름만 뽑고싶어
+        List<NestedClosedProjection> result = memberRepository.findProjectionsByUsername("m1", NestedClosedProjection.class);
+
+        for(NestedClosedProjection nestedClosedProjection : result){
+            System.out.println("nestedClosedProjection = " + nestedClosedProjection);
+        }
+
+    }
 
 
 
